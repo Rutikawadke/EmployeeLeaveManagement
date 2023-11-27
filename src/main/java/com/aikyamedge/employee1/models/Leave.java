@@ -25,6 +25,7 @@ public class Leave {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+    private Integer leaveDays;
 
     @Column(name = "status")
     private String status; // Use String for leave status

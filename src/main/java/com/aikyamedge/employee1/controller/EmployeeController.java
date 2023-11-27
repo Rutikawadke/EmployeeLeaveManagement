@@ -1,6 +1,7 @@
 package com.aikyamedge.employee1.controller;
 
 import com.aikyamedge.employee1.dto.AuthRequest;
+import com.aikyamedge.employee1.dto.EmployeeDto;
 import com.aikyamedge.employee1.models.Employee;
 import com.aikyamedge.employee1.service.EmployeeService;
 import com.aikyamedge.employee1.service.JWTService;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/api")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
@@ -26,34 +27,38 @@ public class EmployeeController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JWTService jwtService;
-    @GetMapping
+
+    @GetMapping("/admin/employees")
     public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+        List<Employee> list = employeeService.getAllEmployees();
+        for (Employee employee : list){
+            String email = employee.getEmail();
+            System.out.println(email);
+        }
+        return list;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/any/employees/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         Optional<Employee> employee = employeeService.getEmployeeById(id);
         return employee.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-//    @PostMapping("/create")
-//    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
-//        Employee savedEmployee = employeeService.saveEmployee(employee);
-//        return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
-//    }
-    @PostMapping("/create")
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee){
-        Employee savedEmployee = employeeService.saveEmployee(employee);
+
+    @PostMapping("/register")
+    public ResponseEntity<Employee> createEmployee(@RequestBody EmployeeDto employeeDto) {
+        Employee savedEmployee = employeeService.saveEmployee(employeeDto);
         return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
     }
-    @DeleteMapping("/{id}")
+
+    @DeleteMapping("/any/employees/{id}")
     public String deleteEmployee(@PathVariable Long id) {
-       return employeeService.deleteEmployee(id);
+        return employeeService.deleteEmployee(id);
 
 //        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    @GetMapping("/{empId}/leaveCount")
+
+    @GetMapping("/employee/employees/{empId}/leaveCount")
     public ResponseEntity<Integer> getLeaveCount(@PathVariable Long empId) {
         int leaveCount = employeeService.getLeaveCount(empId);
         return new ResponseEntity<>(leaveCount, HttpStatus.OK);
@@ -69,5 +74,18 @@ public class EmployeeController {
         }
 
         return "Invalid credentials.";
+    }
+    @PatchMapping("/admin/{Id}/updateSalary")
+    public ResponseEntity<Employee> updateEmployeeSalary(
+            @PathVariable("Id") Long employeeId,
+            @RequestParam("salary") int newSalary) {
+
+        Employee updatedEmployee = employeeService.setEmployeeCurrentSalary(employeeId, newSalary);
+
+        if (updatedEmployee != null) {
+            return ResponseEntity.ok(updatedEmployee);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -1,10 +1,12 @@
 package com.aikyamedge.employee1.dto;
 
 import com.aikyamedge.employee1.models.Employee;
+import com.aikyamedge.employee1.models.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -17,12 +19,19 @@ public class UserDetail implements UserDetails {
     private List<GrantedAuthority> grantedAuthorities;
     private String password;
     public UserDetail(Employee user) {
+        List<Role> roles = user.getRoles();
+        String[] arrayOfRoles = new String[roles.size()];
+
+        for(int i = 0; i < roles.size(); i++){
+            arrayOfRoles[i] = roles.get(i).getRoleTitle();
+        }
         this.email = user.getEmail();
         this.password = user.getPassword();
-        this.grantedAuthorities = Arrays.stream(user.getRole().split(","))
+        this.grantedAuthorities = Arrays.stream(arrayOfRoles)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

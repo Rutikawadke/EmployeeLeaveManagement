@@ -1,8 +1,10 @@
 package com.aikyamedge.employee1.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,17 +24,26 @@ public class Employee {
     private String email;
     private String password;
     private String address;
-    private String role;
+    @JsonIgnore
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL , fetch = FetchType.EAGER)
+    private List<Role> roles = new ArrayList<>();
 
     @Column(name = "leave_count")
-    private int leaveCount;
+    private Integer leaveCount;
 
     @OneToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
     private List<Leave> leaves;
+
+    @Column(name = "current_salary")
+    private Integer currentSalary;
+
+    @Column(name = "salary_to_pay")
+    private Integer salary;
 
     // Getters and setters
 }
